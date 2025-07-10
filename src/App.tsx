@@ -32,7 +32,7 @@ function Window1() {
     const textures = [
       colorMap,
       normalMap,
-      roughnessMap,
+      //   roughnessMap,
       metalnessMap,
       aoMap,
       heightMap,
@@ -111,28 +111,46 @@ function Window1() {
   );
 }
 
+// Enhanced lighting setup for better texture visibility
 function Lighting() {
   return (
     <>
-      <ambientLight intensity={0.2} />
+      {/* Higher ambient light to see texture details in shadows */}
+      <ambientLight intensity={0.4} color="#ffffff" />
+      {/* Key light - stronger and more focused */}
       <directionalLight
-        position={[5, 10, 7]}
-        intensity={1}
+        position={[8, 12, 6]}
+        intensity={1.8}
+        color="#ffffff"
         castShadow
-        shadow-mapSize={[2048, 2048]}
-        shadow-camera-far={20}
-        shadow-camera-left={-10}
-        shadow-camera-right={10}
-        shadow-camera-top={10}
-        shadow-camera-bottom={-10}
-        shadow-bias={-0.0001}
+        shadow-mapSize={[4096, 4096]}
+        shadow-camera-far={25}
+        shadow-camera-left={-12}
+        shadow-camera-right={12}
+        shadow-camera-top={12}
+        shadow-camera-bottom={-12}
+        shadow-bias={-0.00005}
+        shadow-normalBias={0.02}
       />
+      {/* Fill light - cooler tone, medium intensity */}
       <directionalLight
-        position={[-3, 5, -2]}
-        intensity={0.3}
-        color="#4488ff"
+        position={[-6, 8, -4]}
+        intensity={0.8}
+        color="#88bbff"
       />
-      <directionalLight position={[0, 2, -5]} intensity={0.2} color="#ffaa44" />
+      {/* Rim light - warm accent from behind */}
+      <directionalLight position={[2, 3, -8]} intensity={0.6} color="#ffbb66" />
+      {/* Additional side lights for texture detail */}
+      <directionalLight position={[-8, 5, 2]} intensity={0.4} color="#ffffff" />
+      <directionalLight position={[8, 3, -2]} intensity={0.3} color="#ffddaa" />
+      {/* Point light close to object for detail */}
+      <pointLight
+        position={[2, 3, 3]}
+        intensity={0.8}
+        color="#ffffff"
+        distance={10}
+        decay={2}
+      />
     </>
   );
 }
@@ -218,32 +236,6 @@ export default function App() {
         />
         <PerformanceStats />
       </Canvas>
-      <div
-        style={{
-          position: "absolute",
-          top: 20,
-          left: 20,
-          background: "rgba(0,0,0,0.8)",
-          color: "white",
-          padding: "15px",
-          borderRadius: "8px",
-          fontSize: "14px",
-          maxWidth: "250px",
-        }}
-      >
-        <h3 style={{ margin: "0 0 10px 0", fontSize: "8px" }}>
-          Material Analysis
-        </h3>
-        <div style={{ opacity: 0.8, fontSize: "8px" }}>
-          <p style={{ margin: "5px 0" }}>✓ Base Color (Albedo)</p>
-          <p style={{ margin: "5px 0" }}>✓ Normal Map (Surface Detail)</p>
-          <p style={{ margin: "5px 0" }}>✓ Roughness Map</p>
-          <p style={{ margin: "5px 0" }}>✓ Metallic Map</p>
-          <p style={{ margin: "5px 0" }}>✓ Ambient Occlusion</p>
-          <p style={{ margin: "5px 0" }}>✓ Height Displacement</p>
-          <p style={{ margin: "5px 0" }}>✓ Opacity/Alpha</p>
-        </div>
-      </div>
     </div>
   );
 }
