@@ -102,6 +102,7 @@ function Window1({
   });
 
   return (
+
     <RoundedBox
       args={[1, 1, 1]}
       radius={0.1}
@@ -111,6 +112,7 @@ function Window1({
       receiveShadow
       ref={meshRef}
     >
+
       <meshStandardMaterial
         map={colorMap}
         normalMap={normalMap}
@@ -227,6 +229,7 @@ interface ControlsGUIProps extends LightingProps, Window1Props {
 }
 function ControlsGUI(props: ControlsGUIProps) {
   useEffect(() => {
+
     // Create a local object for lil-gui to control
     const guiState = {
       ambientIntensity: props.ambientIntensity,
@@ -257,7 +260,8 @@ function ControlsGUI(props: ControlsGUIProps) {
       .onChange(props.setFillIntensity);
     lightingFolder
       .add(guiState, "rimIntensity", 0, 2, 0.01)
-      .onChange(props.setRimIntensity);
+
+        .onChange(props.setRimIntensity);
     lightingFolder.open();
     const materialFolder = gui.addFolder("Material");
     materialFolder
@@ -284,6 +288,7 @@ function ControlsGUI(props: ControlsGUIProps) {
     materialFolder.open();
     return () => gui.destroy();
   }, []); // <--- Only run once
+
   return null;
 }
 
@@ -315,7 +320,9 @@ export default function App() {
   // Material state
   const [roughness, setRoughness] = useState(0.3);
   const [metalness, setMetalness] = useState(0.1);
-  const [aoMapIntensity, setAoMapIntensity] = useState(15);
+
+  const [aoMapIntensity, setAoMapIntensity] = useState(1.5);
+
   const [displacementScale, setDisplacementScale] = useState(0.02);
   const [envMapIntensity, setEnvMapIntensity] = useState(0.8);
   const [alphaTest, setAlphaTest] = useState(0.1);
@@ -358,7 +365,9 @@ export default function App() {
       />
       <Canvas
         shadows={{ type: THREE.PCFSoftShadowMap, enabled: true }}
+
         camera={{ position: [7, 7, 5], fov: 25, near: 0.1, far: 100 }}
+
         gl={{
           antialias: true,
           alpha: false,
