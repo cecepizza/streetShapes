@@ -1,19 +1,25 @@
 // --- Imports ---
 import { Canvas, useFrame, useLoader, useThree } from "@react-three/fiber";
-import { OrbitControls, Environment, ContactShadows } from "@react-three/drei";
+import {
+  OrbitControls,
+  Environment,
+  ContactShadows,
+  RoundedBox,
+} from "@react-three/drei";
 import * as THREE from "three";
 import { useRef, useEffect, useMemo, useState } from "react";
 import GUI from "lil-gui";
 
 // --- Texture Paths ---
 const TEXTURE_PATHS = [
-  "/window1_BaseColor.jpg",
-  "/window1_Normal.jpg",
-  "/window1_Roughness.jpg",
-  "/window1_Metallic.jpg",
-  "/window1_AmbientOcclusion.jpg",
-  "/window1_Height.jpg",
-  "/window1_Opacity.jpg",
+  "/window1_metallicSquare/BaseColor.jpg",
+  "/window1_metallicSquare/Normal.jpg",
+  "/window1_metallicSquare/Roughness.jpg",
+  "/window1_metallicSquare/Metallic.jpg",
+  "/window1_metallicSquare/AmbientOcclusion.jpg",
+  "/window1_metallicSquare/Height.jpg",
+  "/window1_metallicSquare/Opacity.jpg",
+  "/window1_metallicSquare/SpecularLevel.jpg",
 ];
 
 // --- 3D Window Cube ---
@@ -96,8 +102,17 @@ function Window1({
   });
 
   return (
-    <mesh ref={meshRef} position={[0, 0.5, 0]} castShadow receiveShadow>
-      <boxGeometry args={[1, 1, 1, 64, 64, 64]} />
+
+    <RoundedBox
+      args={[1, 1, 1]}
+      radius={0.1}
+      smoothness={8}
+      position={[0, 0.5, 0]}
+      castShadow
+      receiveShadow
+      ref={meshRef}
+    >
+
       <meshStandardMaterial
         map={colorMap}
         normalMap={normalMap}
@@ -115,7 +130,7 @@ function Window1({
         alphaTest={alphaTest}
         envMapIntensity={envMapIntensity}
       />
-    </mesh>
+    </RoundedBox>
   );
 }
 
@@ -214,47 +229,66 @@ interface ControlsGUIProps extends LightingProps, Window1Props {
 }
 function ControlsGUI(props: ControlsGUIProps) {
   useEffect(() => {
+
+    // Create a local object for lil-gui to control
+    const guiState = {
+      ambientIntensity: props.ambientIntensity,
+      keyIntensity: props.keyIntensity,
+      keyColor: props.keyColor,
+      fillIntensity: props.fillIntensity,
+      rimIntensity: props.rimIntensity,
+      roughness: props.roughness,
+      metalness: props.metalness,
+      aoMapIntensity: props.aoMapIntensity,
+      displacementScale: props.displacementScale,
+      envMapIntensity: props.envMapIntensity,
+      alphaTest: props.alphaTest,
+      normalScale: props.normalScale,
+    };
+
     const gui = new GUI();
     const lightingFolder = gui.addFolder("Lighting");
     lightingFolder
-      .add(props, "ambientIntensity", 0, 2, 0.01)
+      .add(guiState, "ambientIntensity", 0, 2, 0.01)
       .onChange(props.setAmbientIntensity);
     lightingFolder
-      .add(props, "keyIntensity", 0, 4, 0.01)
+      .add(guiState, "keyIntensity", 0, 4, 0.01)
       .onChange(props.setKeyIntensity);
-    lightingFolder.addColor(props, "keyColor").onChange(props.setKeyColor);
+    lightingFolder.addColor(guiState, "keyColor").onChange(props.setKeyColor);
     lightingFolder
-      .add(props, "fillIntensity", 0, 2, 0.01)
+      .add(guiState, "fillIntensity", 0, 2, 0.01)
       .onChange(props.setFillIntensity);
     lightingFolder
-      .add(props, "rimIntensity", 0, 2, 0.01)
-      .onChange(props.setRimIntensity);
+      .add(guiState, "rimIntensity", 0, 2, 0.01)
+
+        .onChange(props.setRimIntensity);
     lightingFolder.open();
     const materialFolder = gui.addFolder("Material");
     materialFolder
-      .add(props, "roughness", 0, 1, 0.01)
+      .add(guiState, "roughness", 0, 1, 0.01)
       .onChange(props.setRoughness);
     materialFolder
-      .add(props, "metalness", 0, 1, 0.01)
+      .add(guiState, "metalness", 0, 1, 0.01)
       .onChange(props.setMetalness);
     materialFolder
-      .add(props, "aoMapIntensity", 0, 3, 0.01)
+      .add(guiState, "aoMapIntensity", 0, 3, 0.01)
       .onChange(props.setAoMapIntensity);
     materialFolder
-      .add(props, "displacementScale", 0, 0.1, 0.001)
+      .add(guiState, "displacementScale", 0, 0.1, 0.001)
       .onChange(props.setDisplacementScale);
     materialFolder
-      .add(props, "envMapIntensity", 0, 2, 0.01)
+      .add(guiState, "envMapIntensity", 0, 2, 0.01)
       .onChange(props.setEnvMapIntensity);
     materialFolder
-      .add(props, "alphaTest", 0, 1, 0.01)
+      .add(guiState, "alphaTest", 0, 1, 0.01)
       .onChange(props.setAlphaTest);
     materialFolder
-      .add(props, "normalScale", 0, 3, 0.01)
+      .add(guiState, "normalScale", 0, 3, 0.01)
       .onChange(props.setNormalScale);
     materialFolder.open();
     return () => gui.destroy();
-  }, [props]);
+  }, []); // <--- Only run once
+
   return null;
 }
 
@@ -286,7 +320,9 @@ export default function App() {
   // Material state
   const [roughness, setRoughness] = useState(0.3);
   const [metalness, setMetalness] = useState(0.1);
+
   const [aoMapIntensity, setAoMapIntensity] = useState(1.5);
+
   const [displacementScale, setDisplacementScale] = useState(0.02);
   const [envMapIntensity, setEnvMapIntensity] = useState(0.8);
   const [alphaTest, setAlphaTest] = useState(0.1);
@@ -329,7 +365,9 @@ export default function App() {
       />
       <Canvas
         shadows={{ type: THREE.PCFSoftShadowMap, enabled: true }}
-        camera={{ position: [3, 2, 5], fov: 45, near: 0.1, far: 100 }}
+
+        camera={{ position: [7, 7, 5], fov: 25, near: 0.1, far: 100 }}
+
         gl={{
           antialias: true,
           alpha: false,
