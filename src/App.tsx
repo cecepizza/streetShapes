@@ -102,7 +102,6 @@ function Window1({
   });
 
   return (
-
     <RoundedBox
       args={[1, 1, 1]}
       radius={0.1}
@@ -112,7 +111,6 @@ function Window1({
       receiveShadow
       ref={meshRef}
     >
-
       <meshStandardMaterial
         map={colorMap}
         normalMap={normalMap}
@@ -226,10 +224,13 @@ interface ControlsGUIProps extends LightingProps, Window1Props {
   setEnvMapIntensity: (v: number) => void;
   setAlphaTest: (v: number) => void;
   setNormalScale: (v: number) => void;
+  cameraPosition: [number, number, number];
+  setCameraPosition: (v: [number, number, number]) => void;
+  cameraFov: number;
+  setCameraFov: (v: number) => void;
 }
 function ControlsGUI(props: ControlsGUIProps) {
   useEffect(() => {
-
     // Create a local object for lil-gui to control
     const guiState = {
       ambientIntensity: props.ambientIntensity,
@@ -244,10 +245,16 @@ function ControlsGUI(props: ControlsGUIProps) {
       envMapIntensity: props.envMapIntensity,
       alphaTest: props.alphaTest,
       normalScale: props.normalScale,
+      cameraFov: props.cameraFov,
+      cameraPosition: [...props.cameraPosition],
     };
 
     const gui = new GUI();
+    gui.close();
+
+    //lighting controls
     const lightingFolder = gui.addFolder("Lighting");
+    // lightingFolder.close(); // Don't close before adding controls
     lightingFolder
       .add(guiState, "ambientIntensity", 0, 2, 0.01)
       .onChange(props.setAmbientIntensity);
@@ -260,10 +267,12 @@ function ControlsGUI(props: ControlsGUIProps) {
       .onChange(props.setFillIntensity);
     lightingFolder
       .add(guiState, "rimIntensity", 0, 2, 0.01)
-
-        .onChange(props.setRimIntensity);
+      .onChange(props.setRimIntensity);
     lightingFolder.open();
+
+    //material controls
     const materialFolder = gui.addFolder("Material");
+    // materialFolder.close();
     materialFolder
       .add(guiState, "roughness", 0, 1, 0.01)
       .onChange(props.setRoughness);
@@ -286,9 +295,41 @@ function ControlsGUI(props: ControlsGUIProps) {
       .add(guiState, "normalScale", 0, 3, 0.01)
       .onChange(props.setNormalScale);
     materialFolder.open();
+
+    // Camera controls
+    const cameraFolder = gui.addFolder("Camera");
+    // cameraFolder.close();
+    cameraFolder
+      .add(guiState, "cameraFov", 10, 100, 1)
+      .onChange(props.setCameraFov);
+    cameraFolder
+      .add(guiState.cameraPosition, 0, -20, 20, 0.1)
+      .name("cameraPosX")
+      .onChange((v: number) => {
+        const newPos = [...props.cameraPosition];
+        newPos[0] = v;
+        props.setCameraPosition(newPos as [number, number, number]);
+      });
+    cameraFolder
+      .add(guiState.cameraPosition, 1, -20, 20, 0.1)
+      .name("cameraPosY")
+      .onChange((v: number) => {
+        const newPos = [...props.cameraPosition];
+        newPos[1] = v;
+        props.setCameraPosition(newPos as [number, number, number]);
+      });
+    cameraFolder
+      .add(guiState.cameraPosition, 2, -20, 20, 0.1)
+      .name("cameraPosZ")
+      .onChange((v: number) => {
+        const newPos = [...props.cameraPosition];
+        newPos[2] = v;
+        props.setCameraPosition(newPos as [number, number, number]);
+      });
+    cameraFolder.open();
+
     return () => gui.destroy();
   }, []); // <--- Only run once
-
   return null;
 }
 
@@ -320,13 +361,32 @@ export default function App() {
   // Material state
   const [roughness, setRoughness] = useState(0.3);
   const [metalness, setMetalness] = useState(0.1);
-
   const [aoMapIntensity, setAoMapIntensity] = useState(1.5);
-
   const [displacementScale, setDisplacementScale] = useState(0.02);
   const [envMapIntensity, setEnvMapIntensity] = useState(0.8);
   const [alphaTest, setAlphaTest] = useState(0.1);
   const [normalScale, setNormalScale] = useState(1);
+  // Camera state
+  const [cameraPosition, setCameraPosition] = useState<
+    [number, number, number]
+  >([7, 7, 5]);
+  const [cameraFov, setCameraFov] = useState(25);
+
+  // Ensure cameraPosition is always a 3-element array
+  const safeCameraPosition: [number, number, number] =
+    cameraPosition.length === 3
+      ? (cameraPosition as [number, number, number])
+      : [7, 7, 5];
+
+  const cameraRef = useRef<THREE.PerspectiveCamera>(null);
+
+  useEffect(() => {
+    if (cameraRef.current) {
+      cameraRef.current.position.set(...safeCameraPosition);
+      cameraRef.current.fov = cameraFov;
+      cameraRef.current.updateProjectionMatrix();
+    }
+  }, [safeCameraPosition, cameraFov]);
 
   return (
     <div
@@ -362,16 +422,26 @@ export default function App() {
         setAlphaTest={setAlphaTest}
         normalScale={normalScale}
         setNormalScale={setNormalScale}
+        cameraPosition={safeCameraPosition}
+        setCameraPosition={setCameraPosition}
+        cameraFov={cameraFov}
+        setCameraFov={setCameraFov}
       />
       <Canvas
         shadows={{ type: THREE.PCFSoftShadowMap, enabled: true }}
-
-        camera={{ position: [7, 7, 5], fov: 25, near: 0.1, far: 100 }}
-
+        camera={{
+          position: safeCameraPosition,
+          fov: cameraFov,
+          near: 0.1,
+          far: 100,
+        }}
         gl={{
           antialias: true,
           alpha: false,
           powerPreference: "high-performance",
+        }}
+        onCreated={({ camera }) => {
+          cameraRef.current = camera as THREE.PerspectiveCamera;
         }}
       >
         <Lighting
