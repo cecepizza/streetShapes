@@ -7,7 +7,6 @@ import {
 } from "@react-three/drei";
 import * as THREE from "three";
 import { useRef, useEffect, useMemo, useState } from "react";
-import GUI from "lil-gui";
 import { CameraAndMaterialControls } from "./gui";
 
 const TEXTURE_PATHS = [
@@ -224,25 +223,14 @@ export default function Window1Test() {
   const [envMapIntensity, setEnvMapIntensity] = useState(0.8);
   const [alphaTest, setAlphaTest] = useState(0.1);
   const [normalScale, setNormalScale] = useState(1);
-  // Camera state
-  const [minDistance, setMinDistance] = useState(2);
-  const [maxDistance, setMaxDistance] = useState(10);
-  const [maxPolarAngle, setMaxPolarAngle] = useState(Math.PI / 2.2);
+
   const controlsRef = useRef<any>(null);
-  useEffect(() => {
-    if (controlsRef.current) {
-      controlsRef.current.minDistance = minDistance;
-      controlsRef.current.maxDistance = maxDistance;
-      controlsRef.current.maxPolarAngle = maxPolarAngle;
-      controlsRef.current.update && controlsRef.current.update();
-    }
-  }, [minDistance, maxDistance, maxPolarAngle]);
+
   return (
     <div
       style={{
         width: "100vw",
         height: "100vh",
-        minHeight: "100vh",
         background: "#f4f6fa",
         fontFamily: "Inter, system-ui, sans-serif",
         display: "flex",
@@ -251,30 +239,69 @@ export default function Window1Test() {
         justifyContent: "flex-start",
       }}
     >
-      <header
+      <div
         style={{
           width: "100%",
-          maxWidth: 900,
-          margin: "0 auto",
-          padding: "2.5rem 0 1.2rem 0",
-          textAlign: "center",
+          display: "flex",
+          justifyContent: "center",
         }}
       >
-        <h2
+        <header
           style={{
-            color: "#222",
-            fontWeight: 700,
-            fontSize: "2.1rem",
-            letterSpacing: "0.01em",
-            margin: 0,
+            width: "100%",
+            maxWidth: 900,
+            margin: "0 auto",
+            padding: "1.2rem 0 0.5rem 0",
+            textAlign: "left",
+            boxSizing: "border-box",
           }}
         >
-          Photo Mapping Materials Test
-        </h2>
-        <p style={{ color: "#5a5a5a", fontSize: "1.08rem", marginTop: 8 }}>
-          Explore and tweak the 3D window material and lighting in real time.
-        </p>
-      </header>
+          <h2
+            style={{
+              color: "#222",
+              fontWeight: 700,
+              fontSize: "2.1rem",
+              letterSpacing: "0.01em",
+              margin: 0,
+              textAlign: "left",
+              paddingLeft: 24,
+              paddingRight: 24,
+              lineHeight: 1.15,
+            }}
+          >
+            StreetShapes
+          </h2>
+          <p
+            style={{
+              color: "#5a5a5a",
+              fontSize: "1.08rem",
+              margin: "10px 0 0 0",
+              textAlign: "left",
+              paddingLeft: 24,
+              paddingRight: 24,
+              maxWidth: 520,
+              lineHeight: 1.5,
+            }}
+          >
+            visualize how real-world photo textures are mapped onto geometry
+          </p>
+        </header>
+      </div>
+      {/* Responsive styles */}
+      <style>{`
+        @media (max-width: 700px) {
+          header {
+            text-align: center !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+          }
+          header h2, header p {
+            text-align: center !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+          }
+        }
+      `}</style>
       <main
         style={{
           width: "100%",
@@ -293,18 +320,17 @@ export default function Window1Test() {
           style={{
             minWidth: 320,
             maxWidth: 360,
-            width: "100%",
-            background: "#fff",
-            borderRadius: 18,
+            width: "100&",
+            background: "transparent",
+            borderRadius: 2,
             boxShadow: "0 2px 16px 0 rgba(0,0,0,0.07)",
-            padding: 0,
             marginTop: 0,
-            marginBottom: 32,
+            marginBottom: 0,
             display: "flex",
             flexDirection: "column",
-            alignItems: "stretch",
-            justifyContent: "stretch",
-            height: "100%",
+            alignItems: "flex-start",
+            justifyContent: "flex-end",
+            height: "auto",
           }}
         >
           <CameraAndMaterialControls
@@ -332,13 +358,47 @@ export default function Window1Test() {
             setAlphaTest={setAlphaTest}
             normalScale={normalScale}
             setNormalScale={setNormalScale}
-            minDistance={minDistance}
-            setMinDistance={setMinDistance}
-            maxDistance={maxDistance}
-            setMaxDistance={setMaxDistance}
-            maxPolarAngle={maxPolarAngle}
-            setMaxPolarAngle={setMaxPolarAngle}
           />
+          <div style={{ width: "100%", marginTop: 4 }}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                gap: 6,
+                width: "100%",
+                overflowX: "auto",
+                paddingBottom: 8,
+              }}
+            >
+              {[
+                { label: "BaseColor", file: "BaseColor.jpg" },
+                { label: "Normal", file: "Normal.jpg" },
+                { label: "Roughness", file: "Roughness.jpg" },
+                { label: "AO", file: "AmbientOcclusion.jpg" },
+                { label: "Height", file: "Height.jpg" },
+              ].map(({ label, file }) => (
+                <div
+                  key={file}
+                  style={{ textAlign: "center", minWidth: 60, marginRight: 2 }}
+                >
+                  <img
+                    src={`/window1_metallicSquare/${file}`}
+                    alt={label}
+                    style={{
+                      width: "50px",
+                      height: "50px",
+                      objectFit: "cover",
+                      borderRadius: 4,
+                      boxShadow: "0 1px 6px 0 rgba(0,0,0,0.08)",
+                    }}
+                  />
+                  <div style={{ fontSize: 12, color: "#444", marginTop: 2 }}>
+                    {label}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </section>
         <section
           style={{
@@ -382,15 +442,12 @@ export default function Window1Test() {
                 alphaTest={alphaTest}
                 normalScale={normalScale}
               />
-              <Environment preset="city" background={false} />
+              <Environment preset="sunset" background={false} />
               <OrbitControls
                 ref={controlsRef}
                 enablePan
                 enableZoom
                 enableRotate
-                minDistance={minDistance}
-                maxDistance={maxDistance}
-                maxPolarAngle={maxPolarAngle}
               />
               <PerformanceStats />
             </Canvas>

@@ -26,12 +26,6 @@ export interface CameraAndMaterialControlsProps {
   setAlphaTest: (v: number) => void;
   normalScale: number;
   setNormalScale: (v: number) => void;
-  minDistance: number;
-  setMinDistance: (v: number) => void;
-  maxDistance: number;
-  setMaxDistance: (v: number) => void;
-  maxPolarAngle: number;
-  setMaxPolarAngle: (v: number) => void;
 }
 
 export function CameraAndMaterialControls(
@@ -56,9 +50,6 @@ export function CameraAndMaterialControls(
       envMapIntensity: props.envMapIntensity,
       alphaTest: props.alphaTest,
       normalScale: props.normalScale,
-      minDistance: props.minDistance,
-      maxDistance: props.maxDistance,
-      maxPolarAngle: props.maxPolarAngle,
     };
     const gui = new GUI({ container: containerRef.current || undefined });
     guiRef.current = gui;
@@ -102,17 +93,6 @@ export function CameraAndMaterialControls(
       .add(guiState.current, "normalScale", 0, 3, 0.01)
       .onChange(props.setNormalScale);
     materialFolder.open();
-    const cameraFolder = gui.addFolder("Camera Controls");
-    cameraFolder
-      .add(guiState.current, "minDistance", 1, 10, 0.1)
-      .onChange(props.setMinDistance);
-    cameraFolder
-      .add(guiState.current, "maxDistance", 2, 20, 0.1)
-      .onChange(props.setMaxDistance);
-    cameraFolder
-      .add(guiState.current, "maxPolarAngle", 0.1, Math.PI, 0.01)
-      .onChange(props.setMaxPolarAngle);
-    cameraFolder.open();
     return () => gui.destroy();
   }, []);
 
@@ -131,10 +111,6 @@ export function CameraAndMaterialControls(
     guiState.current.envMapIntensity = props.envMapIntensity;
     guiState.current.alphaTest = props.alphaTest;
     guiState.current.normalScale = props.normalScale;
-    guiState.current.minDistance = props.minDistance;
-    guiState.current.maxDistance = props.maxDistance;
-    guiState.current.maxPolarAngle = props.maxPolarAngle;
-    // lil-gui will update the UI automatically if the value changes from the GUI, but not from React, so we force a refresh
     guiRef.current
       .controllersRecursive?.()
       .forEach((c: any) => c.updateDisplay && c.updateDisplay());
@@ -151,23 +127,25 @@ export function CameraAndMaterialControls(
     props.envMapIntensity,
     props.alphaTest,
     props.normalScale,
-    props.minDistance,
-    props.maxDistance,
-    props.maxPolarAngle,
   ]);
 
   return (
     <div
       ref={containerRef}
       style={{
-        width: "100%",
+        width: "auto",
+        maxWidth: 340,
         minHeight: 0,
-        height: "100%",
-        padding: 0,
-        margin: 0,
+        height: "auto",
+        padding: "1.5rem 1.2rem 1.2rem 1.2rem",
+        margin: "1.5rem auto",
+        color: "gray",
+        borderRadius: 16,
+        boxShadow: "0 2px 16px 0 rgba(0,0,0,0.07)",
         display: "flex",
-        alignItems: "stretch",
-        justifyContent: "stretch",
+        alignItems: "flex-start",
+        justifyContent: "center",
+        overflow: "auto",
       }}
     />
   );
