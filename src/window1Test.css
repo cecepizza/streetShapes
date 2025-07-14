@@ -1,0 +1,104 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
+
+body, html, #root {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-family: 'Orbitron', 'system-ui', sans-serif;
+}
+
+.futuristic-bg {
+  width: 100vw;
+  height: 100vh;
+  min-height: 100vh;
+  background: linear-gradient(120deg, #0a0a23 0%, #1a1a40 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.futuristic-bg::before {
+  content: '';
+  position: absolute;
+  top: -20%;
+  left: -20%;
+  width: 140vw;
+  height: 140vh;
+  background: radial-gradient(circle at 30% 30%, #00ffe7 0%, transparent 70%),
+              radial-gradient(circle at 70% 70%, #ff00cc 0%, transparent 70%);
+  opacity: 0.18;
+  z-index: 0;
+  animation: bgMove 16s linear infinite alternate;
+}
+
+@keyframes bgMove {
+  0% { transform: scale(1) translate(0, 0); }
+  100% { transform: scale(1.1) translate(40px, 40px); }
+}
+
+.futuristic-header {
+  width: 100vw;
+  padding: 32px 0 16px 0;
+  text-align: center;
+  z-index: 2;
+  position: relative;
+}
+
+.futuristic-header h2 {
+  font-family: 'Orbitron', 'system-ui', sans-serif;
+  font-size: 2.5rem;
+  color: #fff;
+  letter-spacing: 0.12em;
+  background: linear-gradient(90deg, #00ffe7 0%, #ff00cc 100%);
+
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 8px #00ffe7cc) drop-shadow(0 0 16px #ff00cc99);
+  margin: 0;
+}
+
+.gui-floating-card {
+  position: absolute;
+  top: 90px;
+  left: 40px;
+  min-width: 320px;
+  max-width: 360px;
+  padding: 24px 20px 16px 20px;
+  background: rgba(30, 30, 60, 0.65);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px 0 #00ffe755, 0 1.5px 8px 0 #ff00cc33;
+  border: 1.5px solid rgba(0,255,231,0.18);
+  backdrop-filter: blur(16px) saturate(1.2);
+  z-index: 10;
+  transition: box-shadow 0.3s;
+  animation: floatCard 3.5s ease-in-out infinite alternate;
+}
+
+@keyframes floatCard {
+  0% { transform: translateY(0px) scale(1); }
+  100% { transform: translateY(-10px) scale(1.01); }
+}
+
+.canvas-container {
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+/* Responsive for smaller screens */
+@media (max-width: 700px) {
+  .gui-floating-card {
+    left: 50%;
+    top: 80px;
+    transform: translateX(-50%);
+    min-width: 90vw;
+    max-width: 95vw;
+    padding: 16px 6vw 12px 6vw;
+  }
+  .futuristic-header {
+    padding-top: 18px;
+  }
+} 
