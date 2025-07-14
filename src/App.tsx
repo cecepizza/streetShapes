@@ -227,6 +227,10 @@ interface ControlsGUIProps extends LightingProps, Window1Props {
   setEnvMapIntensity: (v: number) => void;
   setAlphaTest: (v: number) => void;
   setNormalScale: (v: number) => void;
+  cameraPosition: [number, number, number];
+  setCameraPosition: (v: [number, number, number]) => void;
+  cameraFov: number;
+  setCameraFov: (v: number) => void;
 }
 function ControlsGUI(props: ControlsGUIProps) {
   useEffect(() => {
@@ -244,10 +248,16 @@ function ControlsGUI(props: ControlsGUIProps) {
       envMapIntensity: props.envMapIntensity,
       alphaTest: props.alphaTest,
       normalScale: props.normalScale,
+      cameraFov: props.cameraFov,
+      cameraPosition: [...props.cameraPosition],
     };
 
     const gui = new GUI();
+    gui.close();
+
+    //lighting controls
     const lightingFolder = gui.addFolder("Lighting");
+    // lightingFolder.close(); // Don't close before adding controls
     lightingFolder
       .add(guiState, "ambientIntensity", 0, 2, 0.01)
       .onChange(props.setAmbientIntensity);
@@ -263,7 +273,10 @@ function ControlsGUI(props: ControlsGUIProps) {
 
       .onChange(props.setRimIntensity);
     lightingFolder.open();
+
+    //material controls
     const materialFolder = gui.addFolder("Material");
+    // materialFolder.close();
     materialFolder
       .add(guiState, "roughness", 0, 1, 0.01)
       .onChange(props.setRoughness);
@@ -286,9 +299,41 @@ function ControlsGUI(props: ControlsGUIProps) {
       .add(guiState, "normalScale", 0, 3, 0.01)
       .onChange(props.setNormalScale);
     materialFolder.open();
+
+    // Camera controls
+    const cameraFolder = gui.addFolder("Camera");
+    // cameraFolder.close();
+    cameraFolder
+      .add(guiState, "cameraFov", 10, 100, 1)
+      .onChange(props.setCameraFov);
+    cameraFolder
+      .add(guiState.cameraPosition, 0, -20, 20, 0.1)
+      .name("cameraPosX")
+      .onChange((v: number) => {
+        const newPos = [...props.cameraPosition];
+        newPos[0] = v;
+        props.setCameraPosition(newPos as [number, number, number]);
+      });
+    cameraFolder
+      .add(guiState.cameraPosition, 1, -20, 20, 0.1)
+      .name("cameraPosY")
+      .onChange((v: number) => {
+        const newPos = [...props.cameraPosition];
+        newPos[1] = v;
+        props.setCameraPosition(newPos as [number, number, number]);
+      });
+    cameraFolder
+      .add(guiState.cameraPosition, 2, -20, 20, 0.1)
+      .name("cameraPosZ")
+      .onChange((v: number) => {
+        const newPos = [...props.cameraPosition];
+        newPos[2] = v;
+        props.setCameraPosition(newPos as [number, number, number]);
+      });
+    cameraFolder.open();
+
     return () => gui.destroy();
   }, []); // <--- Only run once
-
   return null;
 }
 
@@ -319,6 +364,10 @@ export default function App() {
           height: "100vh",
           backgroundColor: "#fafbfc",
           fontFamily: "Inter, system-ui, sans-serif",
+
+        }}
+        onCreated={({ camera }) => {
+          cameraRef.current = camera as THREE.PerspectiveCamera;
         }}
       >
         <nav
