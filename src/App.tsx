@@ -9,6 +9,9 @@ import {
 import * as THREE from "three";
 import { useRef, useEffect, useMemo, useState } from "react";
 import GUI from "lil-gui";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import Window1Test from "./window1Test";
+import SeperateTest from "./seperateTest";
 
 // --- Texture Paths ---
 const TEXTURE_PATHS = [
@@ -267,6 +270,7 @@ function ControlsGUI(props: ControlsGUIProps) {
       .onChange(props.setFillIntensity);
     lightingFolder
       .add(guiState, "rimIntensity", 0, 2, 0.01)
+
       .onChange(props.setRimIntensity);
     lightingFolder.open();
 
@@ -352,126 +356,115 @@ function PerformanceStats() {
 
 // --- Main App ---
 export default function App() {
-  // Lighting state
-  const [ambientIntensity, setAmbientIntensity] = useState(0.4);
-  const [keyIntensity, setKeyIntensity] = useState(1.8);
-  const [keyColor, setKeyColor] = useState("#ffffff");
-  const [fillIntensity, setFillIntensity] = useState(0.8);
-  const [rimIntensity, setRimIntensity] = useState(0.6);
-  // Material state
-  const [roughness, setRoughness] = useState(0.3);
-  const [metalness, setMetalness] = useState(0.1);
-  const [aoMapIntensity, setAoMapIntensity] = useState(1.5);
-  const [displacementScale, setDisplacementScale] = useState(0.02);
-  const [envMapIntensity, setEnvMapIntensity] = useState(0.8);
-  const [alphaTest, setAlphaTest] = useState(0.1);
-  const [normalScale, setNormalScale] = useState(1);
-  // Camera state
-  const [cameraPosition, setCameraPosition] = useState<
-    [number, number, number]
-  >([7, 7, 5]);
-  const [cameraFov, setCameraFov] = useState(25);
-
-  // Ensure cameraPosition is always a 3-element array
-  const safeCameraPosition: [number, number, number] =
-    cameraPosition.length === 3
-      ? (cameraPosition as [number, number, number])
-      : [7, 7, 5];
-
-  const cameraRef = useRef<THREE.PerspectiveCamera>(null);
-
-  useEffect(() => {
-    if (cameraRef.current) {
-      cameraRef.current.position.set(...safeCameraPosition);
-      cameraRef.current.fov = cameraFov;
-      cameraRef.current.updateProjectionMatrix();
-    }
-  }, [safeCameraPosition, cameraFov]);
-
   return (
-    <div
-      style={{
-        width: "100vw",
-        height: "100vh",
-        backgroundColor: "#0a0a0a",
-        fontFamily: "system-ui, sans-serif",
-      }}
-    >
-      <ControlsGUI
-        ambientIntensity={ambientIntensity}
-        setAmbientIntensity={setAmbientIntensity}
-        keyIntensity={keyIntensity}
-        setKeyIntensity={setKeyIntensity}
-        keyColor={keyColor}
-        setKeyColor={setKeyColor}
-        fillIntensity={fillIntensity}
-        setFillIntensity={setFillIntensity}
-        rimIntensity={rimIntensity}
-        setRimIntensity={setRimIntensity}
-        roughness={roughness}
-        setRoughness={setRoughness}
-        metalness={metalness}
-        setMetalness={setMetalness}
-        aoMapIntensity={aoMapIntensity}
-        setAoMapIntensity={setAoMapIntensity}
-        displacementScale={displacementScale}
-        setDisplacementScale={setDisplacementScale}
-        envMapIntensity={envMapIntensity}
-        setEnvMapIntensity={setEnvMapIntensity}
-        alphaTest={alphaTest}
-        setAlphaTest={setAlphaTest}
-        normalScale={normalScale}
-        setNormalScale={setNormalScale}
-        cameraPosition={safeCameraPosition}
-        setCameraPosition={setCameraPosition}
-        cameraFov={cameraFov}
-        setCameraFov={setCameraFov}
-      />
-      <Canvas
-        shadows={{ type: THREE.PCFSoftShadowMap, enabled: true }}
-        camera={{
-          position: safeCameraPosition,
-          fov: cameraFov,
-          near: 0.1,
-          far: 100,
-        }}
-        gl={{
-          antialias: true,
-          alpha: false,
-          powerPreference: "high-performance",
+    <Router>
+      <div
+        style={{
+          width: "100vw",
+          height: "100vh",
+          backgroundColor: "#fafbfc",
+          fontFamily: "Inter, system-ui, sans-serif",
+
         }}
         onCreated={({ camera }) => {
           cameraRef.current = camera as THREE.PerspectiveCamera;
         }}
       >
-        <Lighting
-          ambientIntensity={ambientIntensity}
-          keyIntensity={keyIntensity}
-          keyColor={keyColor}
-          fillIntensity={fillIntensity}
-          rimIntensity={rimIntensity}
-        />
-        <Ground />
-        <Window1
-          roughness={roughness}
-          metalness={metalness}
-          aoMapIntensity={aoMapIntensity}
-          displacementScale={displacementScale}
-          envMapIntensity={envMapIntensity}
-          alphaTest={alphaTest}
-          normalScale={normalScale}
-        />
-        <Environment preset="city" background={false} />
-        <OrbitControls
-          enablePan
-          enableZoom
-          enableRotate
-          minDistance={2}
-          maxDistance={10}
-          maxPolarAngle={Math.PI / 2.2}
-        />
-        <PerformanceStats />
-      </Canvas>
-    </div>
+        <nav
+          style={{
+            width: "100vw",
+            position: "fixed",
+            top: 0,
+            left: 0,
+            zIndex: 100,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: "0.5rem 0",
+            background: "#fff",
+            boxShadow: "0 2px 12px 0 rgba(0,0,0,0.06)",
+            borderBottom: "1px solid #e5e7eb",
+            borderRadius: 0,
+            fontFamily: "Inter, system-ui, sans-serif",
+            gap: 32,
+          }}
+        >
+          <Link
+            to="/window1"
+            style={{
+              color: "#222",
+              textDecoration: "none",
+              fontWeight: 600,
+              fontSize: "1.08rem",
+              letterSpacing: "0.01em",
+              margin: "0 1.5rem",
+              padding: "0.5rem 1rem",
+              borderRadius: "10px",
+              background: "none",
+              border: "none",
+              transition: "color 0.18s, border-bottom 0.18s",
+              position: "relative",
+              display: "inline-block",
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.color = "#2563eb";
+              e.currentTarget.style.textDecoration = "underline";
+              e.currentTarget.style.textUnderlineOffset = "6px";
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.color = "#222";
+              e.currentTarget.style.textDecoration = "none";
+            }}
+          >
+            Window1 Test
+          </Link>
+          <Link
+            to="/seperate"
+            style={{
+              color: "#222",
+              textDecoration: "none",
+              fontWeight: 600,
+              fontSize: "1.08rem",
+              letterSpacing: "0.01em",
+              margin: "0 1.5rem",
+              padding: "0.5rem 1rem",
+              borderRadius: "10px",
+              background: "none",
+              border: "none",
+              transition: "color 0.18s, border-bottom 0.18s",
+              position: "relative",
+              display: "inline-block",
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.color = "#2563eb";
+              e.currentTarget.style.textDecoration = "underline";
+              e.currentTarget.style.textUnderlineOffset = "6px";
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.color = "#222";
+              e.currentTarget.style.textDecoration = "none";
+            }}
+          >
+            Seperate Test
+          </Link>
+        </nav>
+        <div style={{ paddingTop: 70 }}>
+          <Routes>
+            <Route path="/window1" element={<Window1Test />} />
+            <Route path="/seperate" element={<SeperateTest />} />
+            <Route
+              path="*"
+              element={
+                <div
+                  style={{ color: "#222", textAlign: "center", marginTop: 40 }}
+                >
+                  <h2>Choose a test page above</h2>
+                </div>
+              }
+            />
+          </Routes>
+        </div>
+      </div>
+    </Router>
   );
 }
