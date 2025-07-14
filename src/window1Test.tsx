@@ -134,6 +134,7 @@ interface LightingProps {
   keyColor: string;
   fillIntensity: number;
   rimIntensity: number;
+  keyLightPosition: [number, number, number];
 }
 function Lighting({
   ambientIntensity,
@@ -141,12 +142,13 @@ function Lighting({
   keyColor,
   fillIntensity,
   rimIntensity,
+  keyLightPosition,
 }: LightingProps) {
   return (
     <>
       <ambientLight intensity={ambientIntensity} color="#ffffff" />
       <directionalLight
-        position={[8, 12, 6]}
+        position={keyLightPosition}
         intensity={keyIntensity}
         color={keyColor}
         castShadow
@@ -215,6 +217,10 @@ export default function Window1Test() {
   const [keyColor, setKeyColor] = useState("#ffffff");
   const [fillIntensity, setFillIntensity] = useState(0.8);
   const [rimIntensity, setRimIntensity] = useState(0.6);
+  // Add state for key light position
+  const [keyLightPosition, setKeyLightPosition] = useState<
+    [number, number, number]
+  >([8, 12, 6]);
   // Material state
   const [roughness, setRoughness] = useState(0.3);
   const [metalness, setMetalness] = useState(0.1);
@@ -277,6 +283,8 @@ export default function Window1Test() {
               fontSize: "1.08rem",
               margin: "10px 0 0 0",
               textAlign: "left",
+              marginTop: 10,
+              marginBottom: 10,
               paddingLeft: 24,
               paddingRight: 24,
               maxWidth: 520,
@@ -358,6 +366,8 @@ export default function Window1Test() {
             setAlphaTest={setAlphaTest}
             normalScale={normalScale}
             setNormalScale={setNormalScale}
+            keyLightPosition={keyLightPosition}
+            setKeyLightPosition={setKeyLightPosition}
           />
           <div style={{ width: "100%", marginTop: 4 }}>
             <div
@@ -431,6 +441,7 @@ export default function Window1Test() {
                 keyColor={keyColor}
                 fillIntensity={fillIntensity}
                 rimIntensity={rimIntensity}
+                keyLightPosition={keyLightPosition}
               />
               <Ground />
               <Window1
