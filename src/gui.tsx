@@ -55,42 +55,42 @@ export function CameraAndMaterialControls(
     guiRef.current = gui;
     const lightingFolder = gui.addFolder("Lighting");
     lightingFolder
-      .add(guiState.current, "ambientIntensity", 0, 2, 0.01)
+      .add(guiState.current, "ambientIntensity", 0, 10, 0.01)
       .onChange(props.setAmbientIntensity);
     lightingFolder
-      .add(guiState.current, "keyIntensity", 0, 4, 0.01)
+      .add(guiState.current, "keyIntensity", 0, 20, 0.01)
       .onChange(props.setKeyIntensity);
     lightingFolder
       .addColor(guiState.current, "keyColor")
       .onChange(props.setKeyColor);
     lightingFolder
-      .add(guiState.current, "fillIntensity", 0, 2, 0.01)
+      .add(guiState.current, "fillIntensity", 0, 10, 0.01)
       .onChange(props.setFillIntensity);
     lightingFolder
-      .add(guiState.current, "rimIntensity", 0, 2, 0.01)
+      .add(guiState.current, "rimIntensity", 0, 10, 0.01)
       .onChange(props.setRimIntensity);
     lightingFolder.open();
     const materialFolder = gui.addFolder("Material");
     materialFolder
-      .add(guiState.current, "roughness", 0, 1, 0.01)
+      .add(guiState.current, "roughness", 0, 5, 0.01)
       .onChange(props.setRoughness);
     materialFolder
-      .add(guiState.current, "metalness", 0, 1, 0.01)
+      .add(guiState.current, "metalness", 0, 5, 0.01)
       .onChange(props.setMetalness);
     materialFolder
-      .add(guiState.current, "aoMapIntensity", 0, 3, 0.01)
+      .add(guiState.current, "aoMapIntensity", 0, 10, 0.01)
       .onChange(props.setAoMapIntensity);
     materialFolder
-      .add(guiState.current, "displacementScale", 0, 0.1, 0.001)
+      .add(guiState.current, "displacementScale", 0, 2, 0.001)
       .onChange(props.setDisplacementScale);
     materialFolder
-      .add(guiState.current, "envMapIntensity", 0, 2, 0.01)
+      .add(guiState.current, "envMapIntensity", 0, 10, 0.01)
       .onChange(props.setEnvMapIntensity);
     materialFolder
-      .add(guiState.current, "alphaTest", 0, 1, 0.01)
+      .add(guiState.current, "alphaTest", 0, 5, 0.01)
       .onChange(props.setAlphaTest);
     materialFolder
-      .add(guiState.current, "normalScale", 0, 3, 0.01)
+      .add(guiState.current, "normalScale", 0, 10, 0.01)
       .onChange(props.setNormalScale);
     materialFolder.open();
     return () => gui.destroy();
