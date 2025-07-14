@@ -26,6 +26,8 @@ export interface CameraAndMaterialControlsProps {
   setAlphaTest: (v: number) => void;
   normalScale: number;
   setNormalScale: (v: number) => void;
+  keyLightPosition: [number, number, number];
+  setKeyLightPosition: (v: [number, number, number]) => void;
 }
 
 export function CameraAndMaterialControls(
@@ -50,6 +52,7 @@ export function CameraAndMaterialControls(
       envMapIntensity: props.envMapIntensity,
       alphaTest: props.alphaTest,
       normalScale: props.normalScale,
+      keyLightPosition: [...props.keyLightPosition],
     };
     const gui = new GUI({ container: containerRef.current || undefined });
     guiRef.current = gui;
@@ -69,6 +72,67 @@ export function CameraAndMaterialControls(
     lightingFolder
       .add(guiState.current, "rimIntensity", 0, 10, 0.01)
       .onChange(props.setRimIntensity);
+    // Add key light position controls
+    lightingFolder
+      .add(
+        {
+          get x() {
+            return props.keyLightPosition[0];
+          },
+          set x(v) {
+            props.setKeyLightPosition([
+              v,
+              props.keyLightPosition[1],
+              props.keyLightPosition[2],
+            ]);
+          },
+        },
+        "x",
+        -30,
+        30,
+        0.1
+      )
+      .name("keyLightX");
+    lightingFolder
+      .add(
+        {
+          get y() {
+            return props.keyLightPosition[1];
+          },
+          set y(v) {
+            props.setKeyLightPosition([
+              props.keyLightPosition[0],
+              v,
+              props.keyLightPosition[2],
+            ]);
+          },
+        },
+        "y",
+        -30,
+        30,
+        0.1
+      )
+      .name("keyLightY");
+    lightingFolder
+      .add(
+        {
+          get z() {
+            return props.keyLightPosition[2];
+          },
+          set z(v) {
+            props.setKeyLightPosition([
+              props.keyLightPosition[0],
+              props.keyLightPosition[1],
+              v,
+            ]);
+          },
+        },
+        "z",
+        -30,
+        30,
+        0.1
+      )
+      .name("keyLightZ");
     lightingFolder.open();
     const materialFolder = gui.addFolder("Material");
     materialFolder
@@ -81,14 +145,12 @@ export function CameraAndMaterialControls(
       .add(guiState.current, "aoMapIntensity", 0, 10, 0.01)
       .onChange(props.setAoMapIntensity);
     materialFolder
-      .add(guiState.current, "displacementScale", 0, 2, 0.001)
+      .add(guiState.current, "displacementScale", 0, 0.5, 0.001)
       .onChange(props.setDisplacementScale);
     materialFolder
       .add(guiState.current, "envMapIntensity", 0, 10, 0.01)
       .onChange(props.setEnvMapIntensity);
-    materialFolder
-      .add(guiState.current, "alphaTest", 0, 5, 0.01)
-      .onChange(props.setAlphaTest);
+
     materialFolder
       .add(guiState.current, "normalScale", 0, 10, 0.01)
       .onChange(props.setNormalScale);
@@ -111,6 +173,7 @@ export function CameraAndMaterialControls(
     guiState.current.envMapIntensity = props.envMapIntensity;
     guiState.current.alphaTest = props.alphaTest;
     guiState.current.normalScale = props.normalScale;
+    // Force update of all controllers
     guiRef.current
       .controllersRecursive?.()
       .forEach((c: any) => c.updateDisplay && c.updateDisplay());
@@ -127,6 +190,9 @@ export function CameraAndMaterialControls(
     props.envMapIntensity,
     props.alphaTest,
     props.normalScale,
+    props.keyLightPosition[0],
+    props.keyLightPosition[1],
+    props.keyLightPosition[2],
   ]);
 
   return (
