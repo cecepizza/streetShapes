@@ -124,7 +124,7 @@ function WaitingModel() {
   );
 }
 
-function ReferenceImage() {
+function ReferenceImage({ inverted = false, position = [0, 0, 0.4] }) {
   const texture = useLoader(THREE.TextureLoader, "/models/waiting01.png");
 
   useMemo(() => {
@@ -136,43 +136,47 @@ function ReferenceImage() {
   }, [texture]);
 
   return (
-    <mesh position={[0.02, 0, 0.4]} rotation={[0, 0, 0]}>
+    <mesh position={position} rotation={[0, 0, 0]}>
       <planeGeometry args={[1.92, 1.92]} />
       <meshBasicMaterial
         map={texture}
         transparent
         opacity={1}
-        onBeforeCompile={(shader) => {
-          shader.fragmentShader = shader.fragmentShader.replace(
-            "#include <map_fragment>",
-            `
+        onBeforeCompile={
+          inverted
+            ? (shader) => {
+                shader.fragmentShader = shader.fragmentShader.replace(
+                  "#include <map_fragment>",
+                  `
               #include <map_fragment>
               if (diffuseColor.a > 0.0) {
                 diffuseColor.rgb = 1.0 - diffuseColor.rgb;
               }
             `
-          );
-        }}
+                );
+              }
+            : undefined
+        }
         side={THREE.DoubleSide}
       />
     </mesh>
   );
 }
 
-function Ground() {
-  return (
-    <>
-      <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, -1, 0]}>
-        <planeGeometry args={[10, 10]} />
-        <meshStandardMaterial
-          color="#1a1a1a"
-          roughness={0.9}
-          metalness={0.05}
-        />
-      </mesh>
-    </>
-  );
-}
+// function Ground() {
+//   return (
+//     <>
+//       <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, -1, 0]}>
+//         <planeGeometry args={[10, 10]} />
+//         <meshStandardMaterial
+//           color="#1a1a1a"
+//           roughness={0.9}
+//           metalness={0.05}
+//         />
+//       </mesh>
+//     </>
+//   );
+// }
 
 export default function Waiting1Test() {
   return (
@@ -341,7 +345,10 @@ export default function Waiting1Test() {
                 decay={2}
               />
               {/* <Ground /> */}
-              <ReferenceImage />
+              <ReferenceImage inverted={true} position={[0, 0, 0.4]} />
+              <group scale={[0.5, 0.5, 0.5]}>
+                <ReferenceImage inverted={false} position={[3, 0, 0.4]} />
+              </group>
               <WaitingModel />
               <Environment preset="sunset" background={false} />
               <OrbitControls enablePan enableZoom enableRotate />
