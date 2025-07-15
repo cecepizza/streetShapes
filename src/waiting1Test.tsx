@@ -116,7 +116,7 @@ function WaitingModel() {
       ref={meshRef}
       position={[0, 0, 0]}
       scale={[1, 1, 1]}
-      onPointerOver={() => setTargetDisplacement(0.7)}
+      onPointerOver={() => setTargetDisplacement(55)}
       onPointerOut={() => setTargetDisplacement(0.001)}
     >
       <primitive object={clonedObj} />
@@ -124,20 +124,65 @@ function WaitingModel() {
   );
 }
 
-function Ground() {
+function ReferenceImage({
+  inverted = false,
+  position = [0, 0, 0.4] as [number, number, number],
+}: {
+  inverted?: boolean;
+  position?: [number, number, number];
+}) {
+  const texture = useLoader(THREE.TextureLoader, "/models/waiting01.png");
+
+  useMemo(() => {
+    if (texture) {
+      texture.minFilter = THREE.LinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+      texture.generateMipmaps = false;
+    }
+  }, [texture]);
+
   return (
-    <>
-      <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, -1, 0]}>
-        <planeGeometry args={[10, 10]} />
-        <meshStandardMaterial
-          color="#1a1a1a"
-          roughness={0.9}
-          metalness={0.05}
-        />
-      </mesh>
-    </>
+    <mesh position={position} rotation={[0, 0, 0]}>
+      <planeGeometry args={[1.92, 1.92]} />
+      <meshBasicMaterial
+        map={texture}
+        transparent
+        opacity={1}
+        onBeforeCompile={
+          inverted
+            ? (shader) => {
+                shader.fragmentShader = shader.fragmentShader.replace(
+                  "#include <map_fragment>",
+                  `
+              #include <map_fragment>
+              if (diffuseColor.a > 0.0) {
+                diffuseColor.rgb = 1.0 - diffuseColor.rgb;
+              }
+            `
+                );
+              }
+            : undefined
+        }
+        side={THREE.DoubleSide}
+      />
+    </mesh>
   );
 }
+
+// function Ground() {
+//   return (
+//     <>
+//       <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, -1, 0]}>
+//         <planeGeometry args={[10, 10]} />
+//         <meshStandardMaterial
+//           color="#1a1a1a"
+//           roughness={0.9}
+//           metalness={0.05}
+//         />
+//       </mesh>
+//     </>
+//   );
+// }
 
 export default function Waiting1Test() {
   return (
@@ -231,7 +276,6 @@ export default function Waiting1Test() {
           boxSizing: "border-box",
         }}
       >
-        {/* Removed CameraAndMaterialControls section */}
         <section
           style={{
             flex: 1,
@@ -306,7 +350,11 @@ export default function Waiting1Test() {
                 distance={12}
                 decay={2}
               />
-              <Ground />
+              {/* <Ground /> */}
+              <ReferenceImage inverted={true} position={[0, 0, 0.4]} />
+              <group scale={[0.5, 0.5, 0.5]}>
+                <ReferenceImage inverted={false} position={[3, 0, 0.4]} />
+              </group>
               <WaitingModel />
               <Environment preset="sunset" background={false} />
               <OrbitControls enablePan enableZoom enableRotate />
