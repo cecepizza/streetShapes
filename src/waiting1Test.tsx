@@ -1,7 +1,7 @@
 import { Canvas, useFrame, useLoader } from "@react-three/fiber";
 import { OrbitControls, Environment } from "@react-three/drei";
 import * as THREE from "three";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import { OBJLoader } from "three-stdlib";
 
 // Removed CameraAndMaterialControls import and related state
@@ -11,24 +11,78 @@ function WaitingModel() {
   const [displacementScale, setDisplacementScale] = useState(0.03);
   const [targetDisplacement, setTargetDisplacement] = useState(0.03);
   const obj = useLoader(OBJLoader, "/models/Waiting1_.obj");
+
   // Load all PBR maps
-  const [
-    colorMap,
-    normalMap,
-    roughnessMap,
-    metalnessMap,
-    aoMap,
-    heightMap,
-    opacityMap,
-  ] = useLoader(THREE.TextureLoader, [
-    "/models/matcap-revised (1).png",
-    "/waitingMaterial/waitingMaterial_Normal.jpg",
-    "/waitingMaterial/waitingMaterial_Roughness.jpg",
-    "/waitingMaterial/waitingMaterial_Metallic.jpg",
-    "/waitingMaterial/waitingMaterial_AmbientOcclusion.jpg",
-    "/waitingMaterial/waitingMaterial_Height.jpg",
-    "/waitingMaterial/waitingMaterial_Opacity.jpg",
-  ]);
+  const [colorMap, normalMap, roughnessMap, metalnessMap, aoMap, heightMap] =
+    useLoader(THREE.TextureLoader, [
+      "/waitingMaterial/painterTest/DefaultMaterial_Base_color.jpg",
+      "/waitingMaterial/painterTest/DefaultMaterial_Normal.jpg",
+      "/waitingMaterial/painterTest/DefaultMaterial_Roughness.jpg",
+      "/waitingMaterial/painterTest/DefaultMaterial_Metallic.jpg",
+      "/waitingMaterial/painterTest/DefaultMaterial_Mixed_AO.jpg",
+      "/waitingMaterial/painterTest/DefaultMaterial_Height.jpg",
+    ]);
+
+  // Configure textures
+  useMemo(() => {
+    [colorMap, normalMap, roughnessMap, metalnessMap, aoMap, heightMap].forEach(
+      (texture) => {
+        if (texture) {
+          texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+          texture.minFilter = THREE.LinearMipmapLinearFilter;
+          texture.magFilter = THREE.LinearFilter;
+          texture.generateMipmaps = true;
+          texture.flipY = false; // OBJ models often need this
+        }
+      }
+    );
+
+    // Debug: log texture loading
+    console.log("Textures loaded:", {
+      colorMap: colorMap?.image?.src,
+      hasColorMap: !!colorMap,
+      textureSize: colorMap
+        ? `${colorMap.image.width}x${colorMap.image.height}`
+        : "none",
+    });
+  }, [colorMap, normalMap, roughnessMap, metalnessMap, aoMap, heightMap]);
+
+  // Create material and apply to model
+  const clonedObj = useMemo(() => {
+    const cloned = obj.clone();
+
+    cloned.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        // Ensure UV2 for AO map
+        if (!child.geometry.attributes.uv2 && child.geometry.attributes.uv) {
+          child.geometry.setAttribute(
+            "uv2",
+            new THREE.BufferAttribute(child.geometry.attributes.uv.array, 2)
+          );
+        }
+
+        child.material = new THREE.MeshStandardMaterial({
+          map: colorMap,
+          normalMap: normalMap,
+          normalScale: new THREE.Vector2(1, 1),
+          roughnessMap: roughnessMap,
+          roughness: 1.0,
+          metalnessMap: metalnessMap,
+          metalness: 1.5,
+          aoMap: aoMap,
+          aoMapIntensity: 2.0,
+          displacementMap: heightMap,
+          displacementScale: 0.1,
+          envMapIntensity: 1.0,
+        });
+
+        child.castShadow = true;
+        child.receiveShadow = true;
+      }
+    });
+
+    return cloned;
+  }, [obj, colorMap, normalMap, roughnessMap, metalnessMap, aoMap, heightMap]);
 
   useFrame((state) => {
     if (meshRef.current) {
@@ -38,7 +92,6 @@ function WaitingModel() {
   });
 
   useFrame(() => {
-    // Smoothly interpolate toward the target value
     setDisplacementScale((prev) =>
       Math.abs(prev - targetDisplacement) < 0.001
         ? targetDisplacement
@@ -46,35 +99,17 @@ function WaitingModel() {
     );
   });
 
-  const clonedObj = obj.clone();
-  clonedObj.traverse((child) => {
-    if (child instanceof THREE.Mesh) {
-      child.material = new THREE.MeshStandardMaterial({
-        map: colorMap,
-        normalMap: normalMap,
-        roughnessMap: roughnessMap,
-        metalnessMap: metalnessMap,
-        aoMap: aoMap,
-        displacementMap: heightMap,
-        displacementScale,
-        alphaMap: opacityMap,
-        transparent: true,
-        roughness: 0.4,
-        metalness: 0.2,
-        aoMapIntensity: 1.5,
-        envMapIntensity: 1.0,
-      });
-      child.castShadow = true;
-      child.receiveShadow = true;
-      // Ensure uv2 for aoMap
-      if (!child.geometry.attributes.uv2 && child.geometry.attributes.uv) {
-        child.geometry.setAttribute(
-          "uv2",
-          new THREE.BufferAttribute(child.geometry.attributes.uv.array, 2)
-        );
+  // Update displacement scale on material
+  useEffect(() => {
+    clonedObj.traverse((child) => {
+      if (
+        child instanceof THREE.Mesh &&
+        child.material instanceof THREE.MeshStandardMaterial
+      ) {
+        child.material.displacementScale = displacementScale;
       }
-    }
-  });
+    });
+  }, [displacementScale, clonedObj]);
 
   return (
     <group
@@ -222,22 +257,54 @@ export default function Waiting1Test() {
                 powerPreference: "high-performance",
               }}
             >
-              {/* <Lighting
-                ambientIntensity={ambientIntensity}
-                keyIntensity={keyIntensity}
-                keyColor={keyColor}
-                fillIntensity={fillIntensity}
-                rimIntensity={rimIntensity}
-                keyLightPosition={keyLightPosition}
-              /> */}
-              {/* Add a strong back light behind the model */}
+              {/* Improved lighting setup for PBR materials */}
+              <ambientLight intensity={0.3} color="#ffffff" />
+
+              {/* Key light - main directional light */}
+              <directionalLight
+                position={[5, 8, 3]}
+                intensity={2.5}
+                color="#ffffff"
+                castShadow
+                shadow-mapSize={[2048, 2048]}
+                shadow-camera-far={20}
+                shadow-camera-left={-10}
+                shadow-camera-right={10}
+                shadow-camera-top={10}
+                shadow-camera-bottom={-10}
+                shadow-bias={-0.0001}
+                shadow-normalBias={0.01}
+              />
+
+              {/* Fill light - softer light from opposite side */}
+              <directionalLight
+                position={[-3, 4, -2]}
+                intensity={1.2}
+                color="#b8d4ff"
+              />
+
+              {/* Rim light - highlight edges and surface details */}
+              <directionalLight
+                position={[2, 2, -5]}
+                intensity={1.8}
+                color="#fff2cc"
+              />
+
+              {/* Additional accent lights for texture detail */}
               <pointLight
-                position={[0, 0.1, 0.5]}
-                intensity={13}
-                color="#fff8b0"
-                distance={20}
+                position={[3, 3, 3]}
+                intensity={1.5}
+                color="#ffffff"
+                distance={15}
                 decay={2}
-                castShadow={false}
+              />
+
+              <pointLight
+                position={[-2, 1, 4]}
+                intensity={1.0}
+                color="#ffcc99"
+                distance={12}
+                decay={2}
               />
               <Ground />
               <WaitingModel />
