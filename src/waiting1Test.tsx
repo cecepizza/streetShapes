@@ -124,7 +124,13 @@ function WaitingModel() {
   );
 }
 
-function ReferenceImage({ inverted = false, position = [0, 0, 0.4] }) {
+function ReferenceImage({
+  inverted = false,
+  position = [0, 0, 0.4] as [number, number, number],
+}: {
+  inverted?: boolean;
+  position?: [number, number, number];
+}) {
   const texture = useLoader(THREE.TextureLoader, "/models/waiting01.png");
 
   useMemo(() => {
