@@ -116,11 +116,46 @@ function WaitingModel() {
       ref={meshRef}
       position={[0, 0, 0]}
       scale={[1, 1, 1]}
-      onPointerOver={() => setTargetDisplacement(0.7)}
+      onPointerOver={() => setTargetDisplacement(55)}
       onPointerOut={() => setTargetDisplacement(0.001)}
     >
       <primitive object={clonedObj} />
     </group>
+  );
+}
+
+function ReferenceImage() {
+  const texture = useLoader(THREE.TextureLoader, "/models/waiting01.png");
+
+  useMemo(() => {
+    if (texture) {
+      texture.minFilter = THREE.LinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+      texture.generateMipmaps = false;
+    }
+  }, [texture]);
+
+  return (
+    <mesh position={[0.02, 0, 0.4]} rotation={[0, 0, 0]}>
+      <planeGeometry args={[1.92, 1.92]} />
+      <meshBasicMaterial
+        map={texture}
+        transparent
+        opacity={1}
+        onBeforeCompile={(shader) => {
+          shader.fragmentShader = shader.fragmentShader.replace(
+            "#include <map_fragment>",
+            `
+              #include <map_fragment>
+              if (diffuseColor.a > 0.0) {
+                diffuseColor.rgb = 1.0 - diffuseColor.rgb;
+              }
+            `
+          );
+        }}
+        side={THREE.DoubleSide}
+      />
+    </mesh>
   );
 }
 
@@ -231,7 +266,6 @@ export default function Waiting1Test() {
           boxSizing: "border-box",
         }}
       >
-        {/* Removed CameraAndMaterialControls section */}
         <section
           style={{
             flex: 1,
@@ -306,7 +340,8 @@ export default function Waiting1Test() {
                 distance={12}
                 decay={2}
               />
-              <Ground />
+              {/* <Ground /> */}
+              <ReferenceImage />
               <WaitingModel />
               <Environment preset="sunset" background={false} />
               <OrbitControls enablePan enableZoom enableRotate />
