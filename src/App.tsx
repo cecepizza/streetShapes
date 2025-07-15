@@ -2,6 +2,7 @@
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import Window1Test from "./window1Test";
 import SeperateTest from "./seperateTest";
+import Waiting1Test from "./waiting1Test";
 
 // --- Main App ---
 export default function App() {
@@ -93,11 +94,41 @@ export default function App() {
           >
             Seperate Test
           </Link>
+          <Link
+            to="/waiting1"
+            style={{
+              color: "#222",
+              textDecoration: "none",
+              fontWeight: 600,
+              fontSize: "1.08rem",
+              letterSpacing: "0.01em",
+              margin: "0 1.5rem",
+              padding: "0.5rem 1rem",
+              borderRadius: "10px",
+              background: "none",
+              border: "none",
+              transition: "color 0.18s, border-bottom 0.18s",
+              position: "relative",
+              display: "inline-block",
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.color = "#2563eb";
+              e.currentTarget.style.textDecoration = "underline";
+              e.currentTarget.style.textUnderlineOffset = "6px";
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.color = "#222";
+              e.currentTarget.style.textDecoration = "none";
+            }}
+          >
+            Waiting1 Test
+          </Link>
         </nav>
         <div style={{ paddingTop: 70 }}>
           <Routes>
             <Route path="/window1" element={<Window1Test />} />
             <Route path="/seperate" element={<SeperateTest />} />
+            <Route path="/waiting1" element={<Waiting1Test />} />
             <Route
               path="*"
               element={
