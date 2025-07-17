@@ -1,5 +1,5 @@
 import { Canvas, useFrame, useLoader } from "@react-three/fiber";
-import { OrbitControls, Environment } from "@react-three/drei";
+import { OrbitControls, Environment, RoundedBox } from "@react-three/drei";
 import * as THREE from "three";
 import { useRef, useState, useEffect, useMemo } from "react";
 import { OBJLoader } from "three-stdlib";
@@ -142,8 +142,12 @@ function ReferenceImage({
   }, [texture]);
 
   return (
-    <mesh position={position} rotation={[0, 0, 0]}>
-      <planeGeometry args={[1.92, 1.92]} />
+    <RoundedBox
+      args={[1.92, 1.92, 0.2]}
+      radius={0.18}
+      smoothness={8}
+      position={position}
+    >
       <meshBasicMaterial
         map={texture}
         transparent
@@ -165,7 +169,7 @@ function ReferenceImage({
         }
         side={THREE.DoubleSide}
       />
-    </mesh>
+    </RoundedBox>
   );
 }
 
