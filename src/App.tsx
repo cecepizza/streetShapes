@@ -4,6 +4,7 @@ import Window1Test from "./window1Test";
 import SeperateTest from "./seperateTest";
 import Waiting1Test from "./waiting1Test";
 import ColombiaTest from "./colombiaTest";
+import FlowersTest from "./flowersTest";
 
 // --- Main App ---
 export default function App() {
@@ -153,6 +154,35 @@ export default function App() {
           >
             Colombia Test
           </Link>
+          <Link
+            to="/flowers"
+            style={{
+              color: "#222",
+              textDecoration: "none",
+              fontWeight: 600,
+              fontSize: "1.08rem",
+              letterSpacing: "0.01em",
+              margin: "0 1.5rem",
+              padding: "0.5rem 1rem",
+              borderRadius: "10px",
+              background: "none",
+              border: "none",
+              transition: "color 0.18s, border-bottom 0.18s",
+              position: "relative",
+              display: "inline-block",
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.color = "#2563eb";
+              e.currentTarget.style.textDecoration = "underline";
+              e.currentTarget.style.textUnderlineOffset = "6px";
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.color = "#222";
+              e.currentTarget.style.textDecoration = "none";
+            }}
+          >
+            Flowers Test
+          </Link>
         </nav>
         <div style={{ paddingTop: 70 }}>
           <Routes>
@@ -160,6 +190,7 @@ export default function App() {
             <Route path="/seperate" element={<SeperateTest />} />
             <Route path="/waiting1" element={<Waiting1Test />} />
             <Route path="/colombia" element={<ColombiaTest />} />
+            <Route path="/flowers" element={<FlowersTest />} />
             <Route
               path="*"
               element={
